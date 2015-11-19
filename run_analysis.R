@@ -31,18 +31,20 @@ mergeData <- function(name, dir='UCI HAR Dataset', feat=featlabl, activ=activlab
     #finally, label as either test or training data so we can distinguish on combining
     analyseme$DataType <- replicate(nrow(analyseme), toupper(name))
 
-    #clean up environment
-    rm(xdata, actvID, subjID, features)
-
     return(analyseme)
 }
 
 extractMS <- function(indata) {
     #find only those columns with a mean or standard deviation, throw the rest out
-    oudata <- indata
+    keepCols <- grep('mean|std', indata)
+    outdata <- indata[,keepCols]
     return(outdata)
 }
 
+
+############################
+######## Main Code #########
+############################
 
 #Get data files, if unzipped folder not in current working directory
 havedata <- file.exists('UCI HAR Dataset')
@@ -63,3 +65,10 @@ traindata <- mergeData('test', feat=featurelabels, activ=activitylabels)
 fulldata <- rbind(traindata, testdata)
 
 #keep only the required vars (w/ means and std. devs)
+keepdata <- extractMS(fulldata)
+
+##and now we've finished step 4 of the instructions
+
+#write to ASCII file
+write.table(keepdata, file='UCI_HAR_reduced.txt', row.names=FALSE, sep='\t')
+
