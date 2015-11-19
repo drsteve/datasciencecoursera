@@ -16,28 +16,64 @@ mergeData <- function(name, dir='UCI HAR Dataset', feat=featlabl, activ=activlab
     features <- read.table(ftname, stringsAsFactors=FALSE)
     #add feature names to variables, add activity ID numbers (actvID)
     names(xdata) <- features$V2
-    analyseme <- cbind(actvID, xdata)
-    colnames(analyseme)[1] <- 'ActivityName'
+    outdata <- cbind(actvID, xdata)
+    colnames(outdata)[1] <- 'ActivityName'
     #replace activity ID with label (descriptive)
-    analyseme$ActivityName <- as.character(analyseme$ActivityName)
+    outdata$ActivityName <- as.character(outdata$ActivityName)
     for (idx in 1:nrow(activ)) {
-        replInds <- analyseme$ActivityName==as.character(idx)
-        analyseme$ActivityName[replInds] <- activ$V2[[idx]]
+        replInds <- outdata$ActivityName==as.character(idx)
+        outdata$ActivityName[replInds] <- activ$V2[[idx]]
     }
     #now add the subject IDs
-    analyseme <- cbind(subjID, analyseme)
-    colnames(analyseme)[1] <- 'SubjectID'
+    outdata <- cbind(subjID, outdata)
+    colnames(outdata)[1] <- 'SubjectID'
 
     #finally, label as either test or training data so we can distinguish on combining
-    analyseme$DataType <- replicate(nrow(analyseme), toupper(name))
+    outdata$DataType <- replicate(nrow(outdata), toupper(name))
 
-    return(analyseme)
+    return(outdata)
 }
 
 extractMS <- function(indata) {
     #find only those columns with a mean or standard deviation, throw the rest out
-    keepCols <- grep('mean|std', indata)
+    keepCols <- grep('mean|std|ActivityName|DataType', names(indata))
     outdata <- indata[,keepCols]
+    return(outdata)
+}
+
+colAvgs <- function(indata, colIgnore=FALSE, group='ActivityName'){
+    #drop all the columns that we don't want, average the rest by group
+    if (is.character(colIgnore)) {
+        colIgnore <- paste(colIgnore, 'DataType', 'ActivityName', sep='|')
+    } else {
+        colIgnore <- paste('DataType', 'ActivityName', sep='|')
+    }
+    keepCols <- -1*grep(colIgnore, names(indata)) #minus column number drops it
+    varnames <- names(indata)[keepCols]
+    colNums  <- seq(length(names(indata)))[keepCols]
+
+    grps <- levels(factor(indata[[group]]))
+    outdata = data.frame(matrix(NA, nrow=length(grps), ncol=length(varnames)))
+    names(outdata) <- varnames
+
+    #loop over groups, so we have an output vector for each
+    rownum <- 1
+    for (gid in grps) {
+        #get indices for our current group
+        useRows <- indata[[group]]==gid
+        #now loop through columns and calculate means
+        colnum = 1
+        for (idx in colNums) {
+            outdata[rownum, colnum] <- mean(indata[[idx]][useRows])
+            colnum <- colnum+1
+        }
+        rownum <- rownum+1
+    }
+
+    #TODO: this only does mean of each variable for each actvity,
+    #also need mean of each variable for each subject... 
+    #Convert to factors and take product? Or split by subject, do this, then stack?
+
     return(outdata)
 }
 
@@ -68,6 +104,8 @@ fulldata <- rbind(traindata, testdata)
 keepdata <- extractMS(fulldata)
 
 ##and now we've finished step 4 of the instructions
+#break into groups by activity and take means of each variable, so we end up with a
+#data frame of 6 rows and N columns
 
 #write to ASCII file
 write.table(keepdata, file='UCI_HAR_reduced.txt', row.names=FALSE, sep='\t')
