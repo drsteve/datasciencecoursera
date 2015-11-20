@@ -1,4 +1,4 @@
-#Code Book
+#Code Book: Human Activity Recognition Using Smartphones Dataset
 ## Data Source and Description
 
 The data used in this exercise are part of the UCI Machine Learning repository and a description
@@ -13,14 +13,21 @@ There are 6 activities captured in these data; the activity names are:
  - STANDING
  - LAYING
 
+A full description of the data is given in the README file contained in the downloaded data set.
+
 ## Input data files
 These data files are downloaded as a ZIP file and unpacked by the `run_analysis.R` code. The
 data are unzipped into the `UCI HAR Dataset` directory.
 >'features.txt': List of all features
+
 >'activity_labels.txt': Links the class labels with their activity name
+
 >'train/X_train.txt': Training data
+
 >'train/y_train.txt': Training labels
+
 >'test/X_test.txt': Test data
+
 >'test/y_test.txt': Test labels
 
 ## Data Transformation
@@ -54,3 +61,7 @@ Actions performed by `run_analysis.R` to create the tidy output file
  - For each subject, calculate the mean of all variables, for each activity name
  - Re-combine the summarized data frames for each subject, forming a tidy data set
  - Write the tidy dataset to file
+
+## Output File
+The final file contains 180 columns, corresponding to all combinations of 30 subjects
+and 6 activity types.
