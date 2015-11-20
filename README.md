@@ -4,7 +4,7 @@
 This repository contains:
 
  - `README.md` : This file
- - `CodeBook.md` : A full description of the data set
+ - `CodeBook.md` : A full description of the data set and analysis method
  - `run_analysis.R` : R script to clean the data set
  - `UCI_HAR_reduced.txt` : ASCII data file produced by `run_analysis.R`
 
@@ -24,3 +24,7 @@ If the data are not in the working directory they will be downloaded and
 unzipped before proceeding.
 
 The output should be an ASCII file named `UCI_HAR_reduced.txt`
+
+### For further information
+The code (`run_analysis.R`) is heavily commented, and a description of its
+contents and purpose can be found in the code book (`CodeBook.md`).
