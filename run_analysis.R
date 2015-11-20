@@ -35,8 +35,8 @@ mergeData <- function(name, dir='UCI HAR Dataset', feat=featlabl, activ=activlab
 }
 
 extractMS <- function(indata) {
-    #find only those columns with a mean or standard deviation, throw the rest out
-    keepCols <- grep('mean|std|ActivityName|DataType', names(indata))
+    #find only those columns with a mean (mean()) or standard deviation (std()), throw the rest out
+    keepCols <- grep('mean\\(|std\\(|ActivityName|DataType|SubjectID', names(indata))
     outdata <- indata[,keepCols]
     return(outdata)
 }
@@ -51,11 +51,11 @@ colAvgs <- function(indata, colIgnore=FALSE, group='ActivityName'){
     keepCols <- -1*grep(colIgnore, names(indata)) #minus column number drops it
     varnames <- names(indata)[keepCols]
     colNums  <- seq(length(names(indata)))[keepCols]
+    subj     <- indata$SubjectID[1] #these are all the same since we pass in grouped tables
 
     grps <- levels(factor(indata[[group]]))
     outdata = data.frame(matrix(NA, nrow=length(grps), ncol=length(varnames)))
     names(outdata) <- varnames
-
     #loop over groups, so we have an output vector for each
     rownum <- 1
     for (gid in grps) {
@@ -69,10 +69,11 @@ colAvgs <- function(indata, colIgnore=FALSE, group='ActivityName'){
         }
         rownum <- rownum+1
     }
-
-    #TODO: this only does mean of each variable for each actvity,
-    #also need mean of each variable for each subject... 
-    #Convert to factors and take product? Or split by subject, do this, then stack?
+    #now add the ActivityName and SubjectID back in...
+    outdata <- cbind(grps, outdata)
+    names(outdata)[1] <- 'ActivityName'
+    outdata <- cbind(rep(subj, nrow(outdata)), outdata)
+    names(outdata)[1] <- 'SubjectID'
 
     return(outdata)
 }
@@ -95,7 +96,7 @@ if (!havedata) {
 featurelabels <- read.table('UCI HAR Dataset/features.txt')
 activitylabels <- read.table('UCI HAR Dataset/activity_labels.txt', stringsAsFactors=FALSE)
 testdata <- mergeData('test', feat=featurelabels, activ=activitylabels)
-traindata <- mergeData('test', feat=featurelabels, activ=activitylabels)
+traindata <- mergeData('train', feat=featurelabels, activ=activitylabels)
 
 #now combine test and training data so we have one tidy table
 fulldata <- rbind(traindata, testdata)
@@ -104,9 +105,16 @@ fulldata <- rbind(traindata, testdata)
 keepdata <- extractMS(fulldata)
 
 ##and now we've finished step 4 of the instructions
-#break into groups by activity and take means of each variable, so we end up with a
-#data frame of 6 rows and N columns
+#break into groups by subject and activity and take means of each variable, so we end up with a
+#data frame of X rows and N columns, where X is the number of combinations of subject and activity
+subjList <- split(keepdata, keepdata$SubjectID) #break into groups by subject
+avgList <- lapply(subjList, colAvgs) #now for each group do column averages for each ActivityName
 
-#write to ASCII file
-write.table(keepdata, file='UCI_HAR_reduced.txt', row.names=FALSE, sep='\t')
+#then recombine sub-tables in single data table
+cleanTable <- do.call('rbind', avgList)
+#TODO: subjectID column is duplicated - for now, remove here, but should fix cause
+cleanTable <- cleanTable[, -3]
+
+#write to ASCII file, tab-delimited
+write.table(cleanTable, file='UCI_HAR_reduced.txt', row.names=FALSE, sep='\t')
 
