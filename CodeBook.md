@@ -18,16 +18,19 @@ A full description of the data is given in the README file contained in the down
 ## Variables
 All variables, called 'Features' in the dataset notes, are normalized and bounded in the interval [-1,1]
 
-The features are listed below, with units (given above the list) surmised from the measurement description 
-and physical quantity, and the `XYZ` suffix denotes Cartesian components of a vector measurement. The 
+The features are listed below, with units (given above the list) of the original data surmised 
+from the measurement description and physical quantity, and the `XYZ` suffix denotes Cartesian components of a vector measurement. The 
 `Mag` suffix denotes a vector magnitude (Euclidean Norm).
 
 `Acc` refers to a linear acceleration, units of [m/s^2]
 `AccJerk` refers to the time derivative of a linear acceleration, units of [m/s^3]
 `Gyro` refers to an angular velocity (use of radians or degrees unclear)
 `GyroJerk` refers to the second derivative wrt time of the angular velocity
-Assuming radians were used for the angular measurements, the units of `Gyro` and `GyroJerk`
-variables should be [rad/s] and [rad/s^3], respectively.
+Assuming radians were used for the angular measurements, the units of measured `Gyro` and `GyroJerk`
+variables would be [rad/s] and [rad/s^3], respectively.
+
+Note, as stated at the top of this section, that all data have been normalized, so the resulting 
+variables stored in these files should be dimensionless.
 
 The variables prefixed with `t` are time domain variables and the variables prefixed with `f`
 are frequency domain variables, derived by applying a Fast Fourier Transform (filter details
