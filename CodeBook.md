@@ -87,6 +87,8 @@ Functions defined in `run_analysis.R`
    * `mean(` in the name
    * `std(` in the name
    * and ActivityName, DataType, SubjectID
+ - `colAvgs` : takes a data frame, groups by a variable (ActivityName), 
+    calculates mean of all other variables, returns 'reduced' data frame
 
 Actions performed by `run_analysis.R` to create the tidy output file
  - Check for presence of HAR dataset, if not present then download
